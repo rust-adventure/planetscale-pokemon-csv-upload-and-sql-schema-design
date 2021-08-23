@@ -20,7 +20,9 @@ async fn main() -> Result<()> {
         .connect(&database_url)
         .await?;
 
-    let pokemon_csv = fs::read_to_string("./pokemon.csv")?;
+    let pokemon_csv = fs::read_to_string(
+        "./crates/upload-pokemon-data/pokemon.csv",
+    )?;
     let csv_size = pokemon_csv.lines().count();
 
     let mut csv_reader =
