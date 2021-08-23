@@ -210,22 +210,20 @@ impl fmt::Debug for PokemonId {
         f: &mut fmt::Formatter<'_>,
     ) -> fmt::Result {
         f.debug_struct("PokemonId")
-            .field("x", &self.0.to_base62())
+            .field("id", &self.0.to_base62())
             .finish()
     }
 }
 
-impl<'r, DB: Database> Decode<'r, DB> for PokemonId
-where
-    &'r [u8]: Decode<'r, DB>,
-{
+impl<'r> Decode<'r, MySql> for PokemonId {
     fn decode(
-        value: <DB as HasValueRef<'r>>::ValueRef,
+        value: <MySql as HasValueRef<'r>>::ValueRef,
     ) -> Result<
         PokemonId,
         Box<dyn std::error::Error + 'static + Send + Sync>,
     > {
-        let value = <&[u8] as Decode<DB>>::decode(value)?;
+        let value =
+            <&[u8] as Decode<MySql>>::decode(value)?;
         let base62_ksuid = std::str::from_utf8(&value)?;
         Ok(PokemonId(Ksuid::from_base62(
             base62_ksuid,
@@ -233,7 +231,7 @@ where
     }
 }
 
-impl<'q, 't> Encode<'q, MySql> for PokemonId {
+impl<'q> Encode<'q, MySql> for PokemonId {
     fn encode_by_ref(
         &self,
         buf: &mut <MySql as HasArguments<'q>>::ArgumentBuffer,

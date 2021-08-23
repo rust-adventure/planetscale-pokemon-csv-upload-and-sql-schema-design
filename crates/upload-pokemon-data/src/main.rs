@@ -1,6 +1,5 @@
 use eyre::Result;
 use indicatif::ProgressIterator;
-use ksuid::Ksuid;
 use sqlx::mysql::MySqlPoolOptions;
 use std::{
     collections::HashMap, convert::TryFrom, env, fs,

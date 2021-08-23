@@ -6,7 +6,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]]
 name = "upload-pokemon-data"
-path = "src/upload-pokemon-data.rs"
+path = "src/main.rs"
 
 [dependencies]
 Inflector = "0.11.4"
