@@ -1,7 +1,10 @@
+use std::fmt;
+
 use ksuid::Ksuid;
 
+#[derive(Debug)]
 pub struct PokemonTableRow {
-    pub id: Ksuid,
+    pub id: PokemonId,
     pub name: String,
     pub slug: String,
     pub pokedex_id: u16,
@@ -46,4 +49,23 @@ pub struct PokemonTableRow {
     pub dark_attack_effectiveness: f32,
     pub steel_attack_effectiveness: f32,
     pub fairy_attack_effectiveness: f32,
+}
+
+pub struct PokemonId(Ksuid);
+
+impl fmt::Debug for PokemonId {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
+        f.debug_tuple("PokemonId")
+            .field(&self.0.to_base62())
+            .finish()
+    }
+}
+
+impl PokemonId {
+    pub fn new() -> Self {
+        PokemonId(Ksuid::generate())
+    }
 }
