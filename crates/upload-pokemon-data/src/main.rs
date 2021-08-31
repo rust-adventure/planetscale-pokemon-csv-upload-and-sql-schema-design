@@ -1,4 +1,6 @@
+mod db;
 mod pokemon_csv;
+use db::*;
 use pokemon_csv::*;
 
 fn main() -> Result<(), csv::Error> {
