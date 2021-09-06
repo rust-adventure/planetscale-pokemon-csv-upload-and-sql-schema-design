@@ -1,5 +1,10 @@
 use inflector::Inflector;
 use ksuid::Ksuid;
+use sqlx::{
+    database::HasArguments, encode::IsNull,
+    mysql::MySqlTypeInfo, Database, Encode, MySql,
+    MySqlPool, Type,
+};
 use std::fmt;
 
 use crate::pokemon_csv::PokemonCsv;
@@ -165,5 +170,177 @@ impl From<PokemonCsv> for PokemonTableRow {
             steel_attack_effectiveness,
             fairy_attack_effectiveness,
         }
+    }
+}
+
+pub async fn insert_pokemon(
+    pool: &MySqlPool,
+    PokemonTableRow {
+        id,
+        slug,
+        name,
+        pokedex_id,
+        hp,
+        attack,
+        defense,
+        special_attack,
+        special_defense,
+        speed,
+        height,
+        weight,
+        generation,
+        female_rate,
+        genderless,
+        legendary_or_mythical,
+        is_default,
+        forms_switchable,
+        base_experience,
+        capture_rate,
+        base_happiness,
+        primary_color,
+        number_pokemon_with_typing,
+        normal_attack_effectiveness,
+        fire_attack_effectiveness,
+        water_attack_effectiveness,
+        electric_attack_effectiveness,
+        grass_attack_effectiveness,
+        ice_attack_effectiveness,
+        fighting_attack_effectiveness,
+        poison_attack_effectiveness,
+        ground_attack_effectiveness,
+        fly_attack_effectiveness,
+        psychic_attack_effectiveness,
+        bug_attack_effectiveness,
+        rock_attack_effectiveness,
+        ghost_attack_effectiveness,
+        dragon_attack_effectiveness,
+        dark_attack_effectiveness,
+        steel_attack_effectiveness,
+        fairy_attack_effectiveness,
+    }: &PokemonTableRow,
+) -> Result<sqlx::mysql::MySqlQueryResult, sqlx::Error> {
+    sqlx::query!(
+        r#"
+    INSERT INTO pokemon (
+        id,
+        slug,
+        name,
+        pokedex_id,
+        hp,
+        attack,
+        defense,
+        special_attack,
+        special_defense,
+        speed,
+        height,
+        weight,
+        generation,
+        female_rate,
+        genderless,
+        legendary_or_mythical,
+        is_default,
+        forms_switchable,
+        base_experience,
+        capture_rate,
+        base_happiness,
+        primary_color,
+        number_pokemon_with_typing,
+        normal_attack_effectiveness,
+        fire_attack_effectiveness,
+        water_attack_effectiveness,
+        electric_attack_effectiveness,
+        grass_attack_effectiveness,
+        ice_attack_effectiveness,
+        fighting_attack_effectiveness,
+        poison_attack_effectiveness,
+        ground_attack_effectiveness,
+        fly_attack_effectiveness,
+        psychic_attack_effectiveness,
+        bug_attack_effectiveness,
+        rock_attack_effectiveness,
+        ghost_attack_effectiveness,
+        dragon_attack_effectiveness,
+        dark_attack_effectiveness,
+        steel_attack_effectiveness,
+        fairy_attack_effectiveness
+     )
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        "#,
+        id,
+        slug,
+        name,
+        pokedex_id,
+        hp,
+        attack,
+        defense,
+        special_attack,
+        special_defense,
+        speed,
+        height,
+        weight,
+        generation,
+        female_rate,
+        genderless,
+        legendary_or_mythical,
+        is_default,
+        forms_switchable,
+        base_experience,
+        capture_rate,
+        base_happiness,
+        primary_color,
+        number_pokemon_with_typing,
+        normal_attack_effectiveness,
+        fire_attack_effectiveness,
+        water_attack_effectiveness,
+        electric_attack_effectiveness,
+        grass_attack_effectiveness,
+        ice_attack_effectiveness,
+        fighting_attack_effectiveness,
+        poison_attack_effectiveness,
+        ground_attack_effectiveness,
+        fly_attack_effectiveness,
+        psychic_attack_effectiveness,
+        bug_attack_effectiveness,
+        rock_attack_effectiveness,
+        ghost_attack_effectiveness,
+        dragon_attack_effectiveness,
+        dark_attack_effectiveness,
+        steel_attack_effectiveness,
+        fairy_attack_effectiveness,
+    ).execute(pool).await
+}
+
+// impl<'r> Decode<'r, MySql> for PokemonId {
+//     fn decode(
+//         value: <MySql as HasValueRef<'r>>::ValueRef,
+//     ) -> Result<
+//         PokemonId,
+//         Box<dyn std::error::Error + 'static + Send + Sync>,
+//     > {
+//         let value =
+//             <&[u8] as Decode<MySql>>::decode(value)?;
+//         let base62_ksuid = std::str::from_utf8(&value)?;
+//         Ok(PokemonId(Ksuid::from_base62(
+//             base62_ksuid,
+//         )?))
+//     }
+// }
+
+impl<'q> Encode<'q, MySql> for PokemonId {
+    fn encode_by_ref(
+        &self,
+        buf: &mut <MySql as HasArguments<'q>>::ArgumentBuffer,
+    ) -> IsNull {
+        let bytes: &[u8] = &self.0.to_base62().into_bytes();
+        <&[u8] as Encode<MySql>>::encode(bytes, buf)
+    }
+}
+
+impl Type<MySql> for PokemonId {
+    fn type_info() -> <MySql as Database>::TypeInfo {
+        <&[u8] as Type<MySql>>::type_info()
+    }
+    fn compatible(ty: &MySqlTypeInfo) -> bool {
+        <&[u8] as Type<MySql>>::compatible(ty)
     }
 }
