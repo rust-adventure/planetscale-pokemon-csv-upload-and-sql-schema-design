@@ -174,7 +174,7 @@ impl From<PokemonCsv> for PokemonTableRow {
 }
 
 pub async fn insert_pokemon(
-    pool: &MySqlPool,
+    pool: MySqlPool,
     PokemonTableRow {
         id,
         slug,
@@ -217,7 +217,7 @@ pub async fn insert_pokemon(
         dark_attack_effectiveness,
         steel_attack_effectiveness,
         fairy_attack_effectiveness,
-    }: &PokemonTableRow,
+    }: PokemonTableRow,
 ) -> Result<sqlx::mysql::MySqlQueryResult, sqlx::Error> {
     sqlx::query!(
         r#"
@@ -307,7 +307,7 @@ pub async fn insert_pokemon(
         dark_attack_effectiveness,
         steel_attack_effectiveness,
         fairy_attack_effectiveness,
-    ).execute(pool).await
+    ).execute(&pool).await
 }
 
 // impl<'r> Decode<'r, MySql> for PokemonId {

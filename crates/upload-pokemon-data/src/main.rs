@@ -2,6 +2,8 @@ mod db;
 mod pokemon_csv;
 use color_eyre::{eyre, eyre::WrapErr, Section};
 use db::*;
+use futures::stream::FuturesUnordered;
+use futures::StreamExt;
 use pokemon_csv::*;
 use sqlx::mysql::MySqlPoolOptions;
 use std::env;
@@ -15,7 +17,7 @@ async fn main() -> eyre::Result<()> {
         .suggestion("Run `pscale connect <database> <branch>` to get a connection")?;
 
     let pool = MySqlPoolOptions::new()
-        .max_connections(5)
+        .max_connections(20)
         .connect(&database_url)
         .await
         .suggestion("database urls must be in the form `mysql://username:password@host:port/database`")?;
@@ -23,16 +25,29 @@ async fn main() -> eyre::Result<()> {
     let mut rdr = csv::Reader::from_path(
         "./crates/upload-pokemon-data/pokemon.csv",
     )?;
-    for result in rdr.deserialize() {
-        let record: PokemonCsv = result?;
-        let pokemon_row: PokemonTableRow = record.into();
-        println!(
-            "{} {:?} {}",
-            pokemon_row.pokedex_id,
-            pokemon_row.id,
-            pokemon_row.name
-        );
-        insert_pokemon(&pool, &pokemon_row).await?;
+    let mut work: FuturesUnordered<_> = rdr
+        .deserialize()
+        .map(|result| {
+            let record: PokemonCsv = result.unwrap();
+            let pokemon_row: PokemonTableRow =
+                record.into();
+            println!(
+                "{} {:?} {}",
+                pokemon_row.pokedex_id,
+                pokemon_row.id,
+                pokemon_row.name
+            );
+            tokio::spawn(insert_pokemon(
+                pool.clone(),
+                pokemon_row,
+            ))
+        })
+        .collect();
+    let mut i = 0;
+    while let Some(item) = work.next().await {
+        item??;
+        i += 1;
+        println!("{}", i);
     }
     Ok(())
 }
