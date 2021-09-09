@@ -1541,6 +1541,7 @@ dependencies = [
  "Inflector",
  "color-eyre",
  "csv",
+ "futures",
  "indicatif",
  "ksuid",
  "serde",
