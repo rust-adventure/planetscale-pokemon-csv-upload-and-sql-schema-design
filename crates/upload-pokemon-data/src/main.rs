@@ -1,34 +1,43 @@
 mod db;
 mod pokemon_csv;
-use color_eyre::{eyre, eyre::WrapErr, Section};
 use db::*;
 use futures::{stream::FuturesUnordered, StreamExt};
 use indicatif::{ProgressBar, ProgressIterator};
+use miette::{miette, IntoDiagnostic, WrapErr};
 use pokemon_csv::*;
 use sqlx::mysql::MySqlPoolOptions;
 use std::{collections::HashMap, env, time::Duration};
 
 #[tokio::main]
-async fn main() -> eyre::Result<()> {
-    color_eyre::install()?;
-
-    let database_url = env::var("DATABASE_URL")
-        .wrap_err("Must have a DATABASE_URL set")
-        .suggestion("Run `pscale connect <database> <branch>` to get a connection")?;
+async fn main() -> miette::Result<()> {
+    let database_url = env::var("DATABASE_URL").map_err(|e| {
+        miette!(
+            help="Run `pscale connect <database> <branch>` to get a connection",
+            "{e}"
+        )
+    })
+    .wrap_err("Must have a DATABASE_URL set")?;
 
     let pool = MySqlPoolOptions::new()
         .max_connections(50)
-        .connect_timeout(Duration::from_secs(60 * 5))
+        .acquire_timeout(Duration::from_secs(60 * 5))
         .connect(&database_url)
         .await
-        .suggestion("database urls must be in the form `mysql://username:password@host:port/database`")?;
+        .map_err(|e| {
+            miette!(
+                help="database urls must be in the form `mysql://username:password@host:port/database`",
+                "{e}"
+            )
+        })?;
 
     let mut rdr = csv::Reader::from_path(
         "./crates/upload-pokemon-data/pokemon.csv",
-    )?;
+    )
+    .into_diagnostic()?;
     let pokemon = rdr
         .deserialize()
-        .collect::<Result<Vec<PokemonCsv>, csv::Error>>()?;
+        .collect::<Result<Vec<PokemonCsv>, csv::Error>>()
+        .into_diagnostic()?;
 
     let mut pokemon_map: HashMap<String, PokemonId> =
         HashMap::new();
@@ -131,7 +140,7 @@ async fn main() -> eyre::Result<()> {
 
     let pb = ProgressBar::new(tasks.len() as u64);
     while let Some(item) = tasks.next().await {
-        item??;
+        item.into_diagnostic()?.into_diagnostic()?;
         pb.inc(1);
     }
     pb.finish();
