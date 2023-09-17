@@ -101,4 +101,5 @@ name = "upload-pokemon-data"
 version = "0.1.0"
 dependencies = [
  "csv",
+ "serde",
 ]
