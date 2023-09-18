@@ -1,5 +1,7 @@
 mod pokemon_csv;
 use pokemon_csv::*;
+mod db;
+use db::*;
 
 fn main() -> Result<(), csv::Error> {
     let mut rdr = csv::Reader::from_path(
