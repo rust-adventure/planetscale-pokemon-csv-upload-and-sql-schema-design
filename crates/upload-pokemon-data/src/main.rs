@@ -9,7 +9,8 @@ fn main() -> Result<(), csv::Error> {
     )?;
     for result in rdr.deserialize() {
         let record: PokemonCsv = result?;
-        dbg!(record);
+        let pokemon_row: PokemonTableRow = record.into();
+        dbg!(pokemon_row);
     }
 
     dbg!(PokemonId::new());
