@@ -11,5 +11,8 @@ fn main() -> Result<(), csv::Error> {
         let record: PokemonCsv = result?;
         dbg!(record);
     }
+
+    dbg!(PokemonId::new());
+
     Ok(())
 }
