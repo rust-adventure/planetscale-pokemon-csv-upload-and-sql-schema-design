@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 Inflector = "0.11.4"
 csv = "1.2.2"
+futures = "0.3.28"
 indicatif = "0.17.6"
 ksuid = "0.2.0"
 miette = { version = "5.10.0", features = ["fancy"] }

@@ -8,6 +8,7 @@ use sqlx::{
 };
 use std::fmt;
 
+#[derive(Clone)]
 pub struct PokemonId(Ksuid);
 
 impl fmt::Debug for PokemonId {
@@ -27,7 +28,7 @@ impl PokemonId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PokemonTableRow {
     pub id: PokemonId,
     pub name: String,
@@ -173,7 +174,7 @@ impl From<PokemonCsv> for PokemonTableRow {
 }
 
 pub async fn insert_pokemon(
-    pool: &MySqlPool,
+    pool: MySqlPool,
     PokemonTableRow {
         id,
         slug,
@@ -216,7 +217,7 @@ pub async fn insert_pokemon(
         dark_attack_effectiveness,
         steel_attack_effectiveness,
         fairy_attack_effectiveness,
-    }: &PokemonTableRow,
+    }: PokemonTableRow,
 ) -> Result<sqlx::mysql::MySqlQueryResult, sqlx::Error> {
     sqlx::query!(
         r#"
@@ -306,7 +307,7 @@ pub async fn insert_pokemon(
         dark_attack_effectiveness,
         steel_attack_effectiveness,
         fairy_attack_effectiveness,
-    ).execute(pool).await
+    ).execute(&pool).await
 }
 
 impl<'q> Encode<'q, MySql> for PokemonId {
