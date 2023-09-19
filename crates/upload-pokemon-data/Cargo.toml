@@ -12,3 +12,4 @@ ksuid = "0.2.0"
 miette = { version = "5.10.0", features = ["fancy"] }
 serde = { version = "1.0.188", features = ["derive"] }
 sqlx = { version = "0.7.1", features = ["mysql", "runtime-tokio", "tls-rustls"] }
+tokio = { version = "1.32.0", features = ["full"] }
