@@ -5,6 +5,7 @@ use sqlx::mysql::MySqlPoolOptions;
 use std::env;
 mod db;
 use db::*;
+use indicatif::ProgressIterator;
 
 #[tokio::main]
 async fn main() -> miette::Result<()> {
@@ -31,16 +32,14 @@ async fn main() -> miette::Result<()> {
         "./crates/upload-pokemon-data/pokemon.csv",
     )
     .into_diagnostic()?;
-    for result in rdr.deserialize() {
-        let record: PokemonCsv =
-            result.into_diagnostic()?;
+
+    let pokemon = rdr
+        .deserialize()
+        .collect::<Result<Vec<PokemonCsv>, csv::Error>>()
+        .into_diagnostic()?;
+
+    for record in pokemon.into_iter().progress() {
         let pokemon_row: PokemonTableRow = record.into();
-        println!(
-            "{} {:?} {}",
-            pokemon_row.pokedex_id,
-            pokemon_row.id,
-            pokemon_row.name
-        );
         insert_pokemon(&pool, &pokemon_row)
             .await
             .into_diagnostic()?;
