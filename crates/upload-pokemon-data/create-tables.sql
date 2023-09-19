@@ -49,3 +49,35 @@ CREATE TABLE IF NOT EXISTS pokemon(
     PRIMARY KEY (id),
     UNIQUE (slug)
 );
+
+CREATE TABLE IF NOT EXISTS abilities(
+    id VARBINARY(27) NOT NULL,
+    -- ksuid
+    pokemon_id VARBINARY(27) NOT NULL,
+    ability VARCHAR(16) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS typing(
+    id VARBINARY(27) NOT NULL,
+    -- ksuid
+    pokemon_id VARBINARY(27) NOT NULL,
+    typing VARCHAR(8) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS egg_groups(
+    id VARBINARY(27) NOT NULL,
+    -- ksuid
+    pokemon_id VARBINARY(27) NOT NULL,
+    egg_group VARCHAR(13) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS evolutions(
+    id VARBINARY(27) NOT NULL,
+    -- ksuid
+    pokemon_id VARBINARY(27) NOT NULL,
+    evolves_from VARBINARY(27) NOT NULL,
+    PRIMARY KEY (id)
+);
